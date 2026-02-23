@@ -2,11 +2,15 @@ import { IApiService, Customer, Responsible, Space, Booking, Plan, Subscription,
 import { supabase } from './supabaseClient';
 
 export const supabaseService: IApiService = {
-  // Auth (Mock for now, can implement Supabase Auth later if needed)
+  // Auth via Supabase Auth
   login: async (email, password) => {
-    return email === 'admin@scml.pt' && password === 'admin123';
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return true;
   },
-  logout: () => { },
+  logout: async () => {
+    await supabase.auth.signOut();
+  },
   isAuthenticated: () => true,
 
   // Customers

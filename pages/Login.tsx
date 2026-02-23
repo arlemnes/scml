@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('admin@scml.pt');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -16,8 +16,8 @@ const Login: React.FC = () => {
     try {
       await login(email, password);
       navigate('/dashboard');
-    } catch (err) {
-      alert('Erro ao entrar. Tente novamente.');
+    } catch (err: any) {
+      alert(err?.message === 'Invalid login credentials' ? 'Email ou senha incorretos.' : 'Erro ao entrar. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ const Login: React.FC = () => {
         </form>
 
         <div className="mt-8 text-center text-sm text-slate-400">
-          <p>Login Mock: admin@scml.pt / admin123</p>
+          <p>Acesso restrito a utilizadores autorizados.</p>
         </div>
       </div>
     </div>
