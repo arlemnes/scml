@@ -97,7 +97,7 @@ export const supabaseService: IApiService = {
   },
   createBooking: async (data) => {
     // Sanitize empty date strings to null so PostgreSQL doesn't crash
-    const DATE_FIELDS = ['startDate', 'endDate', 'assemblyDate', 'disassemblyDate', 'start_date', 'end_date', 'setup_date', 'breakdown_date', 'createdAt'];
+    const DATE_FIELDS = ['start_date', 'end_date', 'setup_date', 'breakdown_date', 'createdAt'];
     const payload: any = { ...data };
     for (const field of DATE_FIELDS) {
       if (field in payload && payload[field] === '') {
@@ -110,7 +110,7 @@ export const supabaseService: IApiService = {
   },
   updateBooking: async (id, data) => {
     // Sanitize empty date strings to null so PostgreSQL doesn't crash
-    const DATE_FIELDS = ['startDate', 'endDate', 'assemblyDate', 'disassemblyDate', 'start_date', 'end_date', 'setup_date', 'breakdown_date', 'createdAt'];
+    const DATE_FIELDS = ['start_date', 'end_date', 'setup_date', 'breakdown_date', 'createdAt'];
     const payload: any = { ...data };
     for (const field of DATE_FIELDS) {
       if (field in payload && payload[field] === '') {
@@ -133,6 +133,7 @@ export const supabaseService: IApiService = {
       .update({ status: BookingStatus.EXPIRED })
       .lt('end_date', now)
       .eq('status', BookingStatus.CONFIRMED);
+    // Also check bookings queried with snake_case columns (now matches DB)
   },
 
   // Plans
