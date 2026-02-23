@@ -55,15 +55,32 @@ export const supabaseService: IApiService = {
   getSpaces: async () => {
     const { data, error } = await supabase.from('spaces').select('*');
     if (error) throw error;
-    return data as Space[];
+
+    // Parse the text-based images field back to an array
+    const parsedData = (data as any[]).map(space => {
+      let parsedImages = space.images;
+      if (typeof space.images === 'string') {
+        try { parsedImages = JSON.parse(space.images); } catch (e) { parsedImages = []; }
+      }
+      return { ...space, images: parsedImages };
+    });
+
+    return parsedData as Space[];
   },
   createSpace: async (data) => {
-    const { data: newSpace, error } = await supabase.from('spaces').insert([data]).select().single();
+    // Stringify array for the TEXT column
+    const payload = { ...data, images: Array.isArray(data.images) ? JSON.stringify(data.images) : data.images };
+    const { data: newSpace, error } = await supabase.from('spaces').insert([payload]).select().single();
     if (error) throw error;
     return newSpace as Space;
   },
   updateSpace: async (id, data) => {
-    const { data: updatedSpace, error } = await supabase.from('spaces').update(data).eq('id', id).select().single();
+    // Stringify array for the TEXT column
+    const payload = { ...data };
+    if (payload.images && Array.isArray(payload.images)) {
+      payload.images = JSON.stringify(payload.images) as any;
+    }
+    const { data: updatedSpace, error } = await supabase.from('spaces').update(payload).eq('id', id).select().single();
     if (error) throw error;
     return updatedSpace as Space;
   },
