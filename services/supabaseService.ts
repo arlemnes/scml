@@ -96,12 +96,28 @@ export const supabaseService: IApiService = {
     return data as Booking[];
   },
   createBooking: async (data) => {
-    const { data: newBooking, error } = await supabase.from('bookings').insert([data]).select().single();
+    // Sanitize empty date strings to null so PostgreSQL doesn't crash
+    const DATE_FIELDS = ['startDate', 'endDate', 'assemblyDate', 'disassemblyDate', 'start_date', 'end_date', 'setup_date', 'breakdown_date', 'createdAt'];
+    const payload: any = { ...data };
+    for (const field of DATE_FIELDS) {
+      if (field in payload && payload[field] === '') {
+        payload[field] = null;
+      }
+    }
+    const { data: newBooking, error } = await supabase.from('bookings').insert([payload]).select().single();
     if (error) throw error;
     return newBooking as Booking;
   },
   updateBooking: async (id, data) => {
-    const { data: updatedBooking, error } = await supabase.from('bookings').update(data).eq('id', id).select().single();
+    // Sanitize empty date strings to null so PostgreSQL doesn't crash
+    const DATE_FIELDS = ['startDate', 'endDate', 'assemblyDate', 'disassemblyDate', 'start_date', 'end_date', 'setup_date', 'breakdown_date', 'createdAt'];
+    const payload: any = { ...data };
+    for (const field of DATE_FIELDS) {
+      if (field in payload && payload[field] === '') {
+        payload[field] = null;
+      }
+    }
+    const { data: updatedBooking, error } = await supabase.from('bookings').update(payload).eq('id', id).select().single();
     if (error) throw error;
     return updatedBooking as Booking;
   },
