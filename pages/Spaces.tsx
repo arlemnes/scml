@@ -11,7 +11,7 @@ const SpaceCard: React.FC<{
   onDelete: (id: string) => void
 }> = ({ space, onEdit, onDelete }) => {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
-  const images = Array.isArray(space.images) && space.images.length > 0 ? space.images : ['https://via.placeholder.com/800x400?text=Sem+Foto'];
+  const images = Array.isArray(space.images) && space.images.length > 0 ? space.images : ['https://placehold.co/800x400?text=Sem+Foto'];
 
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -30,6 +30,9 @@ const SpaceCard: React.FC<{
           src={images[currentImgIndex]}
           alt={`${space.name} - Imagem ${currentImgIndex + 1}`}
           className="w-full h-full object-cover transition-transform duration-500"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://placehold.co/800x400?text=Erro+na+Imagem';
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
@@ -181,11 +184,19 @@ const Spaces: React.FC = () => {
     e.preventDefault();
     if (!currentSpace) return;
     setSaveLoading(true);
+
+    // Auto-add the image URL if the user pasted it but forgot to click "Adicionar"
+    let finalSpace = { ...currentSpace };
+    if (newImageUrl.trim() !== '') {
+      finalSpace.images = [...(finalSpace.images || []), newImageUrl.trim()];
+      setNewImageUrl('');
+    }
+
     try {
-      if (currentSpace.id) {
-        await api.updateSpace(currentSpace.id, currentSpace);
+      if (finalSpace.id) {
+        await api.updateSpace(finalSpace.id, finalSpace);
       } else {
-        await api.createSpace(currentSpace as any);
+        await api.createSpace(finalSpace as any);
       }
       setModalOpen(false);
       loadSpaces();
